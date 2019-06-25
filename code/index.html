@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase.js"></script>
+
+</head>
+
+<body>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+  <div class="jumbotron">
+    <h1 class="display-4">GHBuddies</h1>
+    <p class="lead">Left with no one to walk with after 7 PM at GHP? Simply send a request and get a buddy instantly!</p>
+    <hr class="my-4">
+
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-default">Name</span>
+      </div>
+      <input type="text" id="nameInput" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-default">Phone</span>
+      </div>
+      <input type="text" id="phoneInput" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <label class="input-group-text" for="inputGroupSelect01">Starting Destination</label>
+      </div>
+      <select class="custom-select" id="inputGroupSelect01">
+        <option selected>Choose...</option>
+        <option value="Krannert">Krannert</option>
+        <option value="Dana">Dana (Boy's Dorm)</option>
+        <option value="MoField">MoField (Girl's Dorm)</option>
+      </select>
+    </div>
+
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <label class="input-group-text" for="inputGroupSelect01">Ending Destination</label>
+      </div>
+      <select class="custom-select" id="inputGroupSelect02">
+        <option selected>Choose...</option>
+        <option value="Krannert">Krannert</option>
+        <option value="Dana">Dana (Boy's Dorm)</option>
+        <option value="MoField">MoField (Girl's Dorm)</option>
+      </select>
+    </div>
+
+    <button type="button" class="btn btn-dark" onclick="request()">Request</button>
+    <hr class="my-4">
+    <p> We suggest you to call the person to know where exactly they are and what they look like.</p>
+  </div>
+
+  <script>
+    //******************* DATABASE SETUP **********************//
+
+    class User {
+
+      constructor(name, phone, strLoc, endLoc) {
+        this.name = name;
+        this.phone = phone;
+        this.strLoc = strLoc;
+        this.endLoc = endLoc;
+      }
+
+      toString() {
+        return this.name + "  " + this.phone + " " + this.strLoc + " " + this.endLoc;
+      }
+
+    }
+
+    var config = {
+      apiKey: "AIzaSyA0ruBz4ugXyU-LqJHx9nu2RyhEn3Tx-7A",
+      authDomain: "ghbuddies-123.firebaseapp.com",
+      databaseURL: "https://ghbuddies-123.firebaseio.com/",
+      storageBucket: "gs://ghbuddies-123.appspot.com/"
+    };
+    firebase.initializeApp(config);
+
+    var database = firebase.database();
+    var reference = database.ref();
+
+    //******************* DATABASE SETUP **********************//
+
+
+    //******************* VARIABLES **********************//
+
+    var startingDestinationInput = document.getElementById('inputGroupSelect01');
+    var endingDestinationInput = document.getElementById('inputGroupSelect02');
+    var nameInput = document.getElementById("nameInput");
+    var phoneInput = document.getElementById("phoneInput");
+    var name = "";
+    var uid = "";
+
+    //******************* VARIABLES **********************//
+
+    function request() {
+      name = nameInput.value;
+      var phone = phoneInput.value;
+      var startingLocation = startingDestinationInput.options[startingDestinationInput.selectedIndex].text;
+      var endingLocation = endingDestinationInput.options[endingDestinationInput.selectedIndex].text;
+
+      sendDataToDatabase(name, phone, startingLocation, endingLocation);
+      checkParallelRequests();
+    }
+
+    function sendDataToDatabase(name, phone, startingLocation, endingLocation) {
+      if (name.length > 0) {
+        if (phone.length > 0) {
+          if (startingLocation.length > 0) {
+            if (endingLocation.length > 0) {
+              reference.child(name).set({
+                phone: phone,
+                startingLocation: startingLocation,
+                endingLocation: endingLocation,
+                request: "null"
+              });
+            }
+          } else {
+            alert("Please choose a valid location");
+          }
+        } else {
+          alert("Phone not entered");
+        }
+      } else {
+        alert("Name not entered");
+      }
+    }
+
+    function checkParallelRequests() {
+      reference.on('value', function (snapshot) {
+        snapshot.forEach(function (children) {
+          var key = children.key;
+          if (name != key) {
+            reference.child(key).on('value', function(snapshot) {
+              snapshot.forEach(function(children) {
+                if (children.key == "request") {
+                  reference.child(key).child(children.key).on('value', function(snapshot) {
+                    if (children.val() == "null") {
+                      reference.child(name).child(children.key).set(key);
+                      reference.child(key).child(children.key).set(name);
+                      console.log(name + ":" + key);
+                    }
+                  });
+                }
+              });
+            });
+          }
+        });
+      });
+    }
+
+    function getUID() {
+      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
+  </script>
+
+</body>
+
+</html>
