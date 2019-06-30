@@ -79,21 +79,6 @@
   <script>
     //******************* DATABASE SETUP **********************//
 
-    class User {
-
-      constructor(name, phone, strLoc, endLoc) {
-        this.name = name;
-        this.phone = phone;
-        this.strLoc = strLoc;
-        this.endLoc = endLoc;
-      }
-
-      toString() {
-        return this.name + "  " + this.phone + " " + this.strLoc + " " + this.endLoc;
-      }
-
-    }
-
     var config = {
       apiKey: "AIzaSyA0ruBz4ugXyU-LqJHx9nu2RyhEn3Tx-7A",
       authDomain: "ghbuddies-123.firebaseapp.com",
@@ -118,15 +103,18 @@
     var fname = "";
     var lname = "";
     var uid = "";
-
+    var startingLocation = "";
+    var endingLocation = "";
+    var strLoc = false;
+    var endLoc = false;
     //******************* VARIABLES **********************//
 
     function request() {
       fname = fnameInput.value;
       lname = lnameInput.value;
       var phone = phoneInput.value;
-      var startingLocation = startingDestinationInput.options[startingDestinationInput.selectedIndex].text;
-      var endingLocation = endingDestinationInput.options[endingDestinationInput.selectedIndex].text;
+      startingLocation = startingDestinationInput.options[startingDestinationInput.selectedIndex].text;
+      endingLocation = endingDestinationInput.options[endingDestinationInput.selectedIndex].text;
 
       sendDataToDatabase(fname, lname, phone, startingLocation, endingLocation);
       checkParallelRequests();
@@ -162,24 +150,33 @@
           if (fname + " " + lname != key) {
             reference.child(key).on('value', function (snapshot) {
               snapshot.forEach(function(children) {
-                if (children.key == "request") {
-                  reference.child(key).child(children.key).on('value', function(val) {
-                    if (val.val() == "null") {
-                      reference.child(fname + " " + lname).child(children.key).set(key);
-                      reference.child(key).child(children.key).set(fname + " " + lname);
-                      console.log(name + ":" + key);
-                    }
-                  });
-                }
+                var tempK = children.key;
+                reference.child(key).child("request").on('value', function (val) {
+                  if (val.val() == "null") {
+                    reference.child(key).child("startingLocation").on('value', function (val) {
+                      if (val.val() == startingLocation) {
+                        reference.child(key).child("endingLocation").on('value', function (val) {
+                          if (val.val() == endingLocation) {
+                            reference.child(fname + " " + lname).child("request").set(key);
+                            reference.child(key).child("request").set(fname + " " + lname);
+                            console.log(name + ":" + key);
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
               });
             });
           }
         });
       });
+    }
 
     function getUID() {
       return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
+
   </script>
 
 </body>
