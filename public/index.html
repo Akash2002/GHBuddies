@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <title>GHBuddies</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <script src="https://www.gstatic.com/firebasejs/6.1.1/firebase.js"></script>
+
+</head>
+
+<body>
+
+
+  <div class="jumbotron" style="background-color:#0B172A">
+    <h1 class="display-4" style="text-align: center; color:white" ;>GHBuddies</h1>
+    <p class="lead" style="text-align: center ; color:white"">Left with no one to walk with after 7 PM at GHP? Simply send a request and get a buddy instantly!" </p> <hr class="my-4">
+
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="inputGroup-sizing-default" style="color:white;background-color:#BC4123">Name</span>
+        </div>
+        <input type="text" placeholder="First Name" id="fnameInput" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        <input type="text" placeholder="Last Name" id="lnameInput" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+      </div>
+
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="inputGroup-sizing-default" style="color:white;background-color:#BC4123">Phone Number</span>
+        </div>
+        <input type="number" placeholder="XXX-XXX-XXXX" id="phoneInput" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+      </div>
+
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text" for="inputGroupSelect01" style="color:white;background-color:#BC4123">Starting Destination</label>
+        </div>
+        <select class="custom-select" id="inputGroupSelect01">
+          <option selected>Choose...</option>
+          <option value="Krannert">Krannert (Dining Hall)</option>
+          <option value="Cage Center">Cage Center (Gym)</option>
+          <option value="Dana">Dana (Boy's Dorm)</option>
+          <option value="MoField">MoField (Girl's Dorm)</option>
+          <option value="McAllister Hall">McAllister Hall (Math, Science, Engineering, and More!)</option>
+          <option value="Evans Hall">Evans Hall (Social Studies, Acting, and More!)</option>
+          <option value="Chapel">Chapel</option>
+          <option value="Ladd Center">Ladd Center (Medicine)</option>
+        </select>
+      </div>
+
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text" for="inputGroupSelect01" style="color:white;background-color:#BC4123">Ending Destination</label>
+        </div>
+        <select class="custom-select" id="inputGroupSelect02">
+          <option selected>Choose...</option>
+          <option value="Krannert">Krannert</option>
+          <option value="Cage Center">Cage Center (Gym)</option>
+          <option value="Dana">Dana (Boy's Dorm)</option>
+          <option value="MoField">MoField (Girl's Dorm)</option>
+          <option value="McAllister Hall">McAllister Hall (Math, Science, Engineering, and More!)</option>
+          <option value="Evans Hall">Evans Hall (Social Studies, Acting, and More!)</option>
+          <option value="Chapel">Chapel</option>
+          <option value="Ladd Center">Ladd Center (Medicine)</option>
+        </select>
+      </div>
+
+      <button type="button" class="btn btn-dark" onclick="request()" style="color:white; text-align: center; color:white;background-color:#BC4123"">Request</button>
+      <hr class=" my-4">
+        <p style="color:white" ;> We suggest you to call the person to know where exactly they are and what they look like."</p>
+        <a href="CampusMapMain.pdf" style="text-align: center">Click here for a campus map</a>
+  </div>
+
+  <script>
+    firebase.initializeApp({
+      apiKey: 'AIzaSyA0ruBz4ugXyU-LqJHx9nu2RyhEn3Tx-7A',
+      authDomain: 'ghbuddies-123.firebaseapp.com',
+      projectId: 'ghbuddies-123',
+      databaseURL: 'https://ghbuddies-123.firebaseio.com'
+    });
+
+    var startingDestinationInput = document.getElementById('inputGroupSelect01');
+    var endingDestinationInput = document.getElementById('inputGroupSelect02');
+    var fnameInput = document.getElementById("fnameInput");
+    var lnameInput = document.getElementById("lnameInput");
+    var phoneInput = document.getElementById("phoneInput");
+
+    var fname = "";
+    var lname = "";
+    var startingLocation = "";
+    var endingLocation = "";
+    //******************* VARIABLES **********************//
+
+    function request() {
+      fname = fnameInput.value;
+      lname = lnameInput.value;
+      var phone = phoneInput.value;
+      startingLocation = startingDestinationInput.options[startingDestinationInput.selectedIndex].text;
+      endingLocation = endingDestinationInput.options[endingDestinationInput.selectedIndex].text;
+
+      var sendRequest = firebase.functions().httpsCallable('sendRequest');
+      sendRequest({
+        fname: fname,
+        lname: lname,
+        pnumber: phone,
+        startingLocation: startingLocation,
+        endingLocation,
+        endingLocation
+      }).then(function(result) {
+        // Read result of the Cloud Function.
+        var resultMessage = result.data.text;
+        console.log(resultMessage);
+        alert(resultMessage);
+      });
+    }
+  </script>
+
+</body>
+
+</html>
