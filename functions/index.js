@@ -80,10 +80,12 @@ exports.sendRequest = functions.https.onCall((data, context) => {
                             console.log(snapshot.val());
                             num2 = val.val();
                           });
-
-                          sendMessage(num1, "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
-                          sendMessage(num2, "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
-                          return;
+                          if (count < 2) {
+                            sendMessage(num1, "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
+                            sendMessage(num2, "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
+                            count ++;
+                            return;
+                          }
                         }
                       });
                     }
