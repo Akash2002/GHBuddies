@@ -11,7 +11,7 @@ exports.sendRequest = functions.https.onCall((data, context) => {
   var count = 0;
 
   var sentMessage = false;
-
+  var entered = false;
 
   const fname = data.fname;
   const lname = data.lname;
