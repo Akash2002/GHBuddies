@@ -47,18 +47,18 @@ exports.sendRequest = functions.https.onCall((data, context) => {
   }
 
   if (tocontinue) {
-    reference.on('value', function(snapshot) {
+    reference.once('value', function(snapshot) {
       snapshot.forEach(function(children) {
         var key = children.key;
         if (fname + " " + lname !== key) {
-          reference.child(key).on('value', function(snapshot) {
+          reference.child(key).once('value', function(snapshot) {
             snapshot.forEach(function(children) {
               var tempK = children.key;
-              reference.child(key).child("request").on('value', function(val) {
+              reference.child(key).child("request").once('value', function(val) {
                 if (val.val() === "null") {
-                  reference.child(key).child("startingLocation").on('value', function(val) {
+                  reference.child(key).child("startingLocation").once('value', function(val) {
                     if (val.val() === startingLocation) {
-                      reference.child(key).child("endingLocation").on('value', function(val) {
+                      reference.child(key).child("endingLocation").once('value', function(val) {
                         if (val.val() === endingLocation) {
 
                           if (!entered) {
@@ -71,15 +71,16 @@ exports.sendRequest = functions.https.onCall((data, context) => {
                           var num1;
                           var num2;
 
-                          reference.child(fname + " " + lname).child("pnumber").on('value', function(val) {
+                          reference.child(fname + " " + lname).child("pnumber").once('value', function(val) {
                             console.log(snapshot.val());
                             num1 = val.val();
                           });
 
-                          reference.child(key).child("pnumber").on('value', function(val) {
+                          reference.child(key).child("pnumber").once('value', function(val) {
                             console.log(snapshot.val());
                             num2 = val.val();
                           });
+
                           if (count < 1) {
                             sendMessage(num1, "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
                             sendMessage(num2, "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
