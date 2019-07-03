@@ -80,7 +80,7 @@ exports.sendRequest = functions.https.onCall((data, context) => {
                             console.log(snapshot.val());
                             num2 = val.val();
                           });
-                          if (count < 2) {
+                          if (count < 1) {
                             sendMessage(num1, "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
                             sendMessage(num2, "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
                             count ++;
