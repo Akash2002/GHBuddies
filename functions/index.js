@@ -47,59 +47,33 @@ exports.sendRequest = functions.https.onCall((data, context) => {
   }
 
   if (tocontinue) {
-    reference.on('child_added', function(snapshot) {
-      snapshot.forEach(function(children) {
-        var key = children.key;
+    reference.once('value', function(snapshot) {
+      for (var key in snapshot.val()) {
         if (fname + " " + lname !== key) {
-          reference.child(key).on('child_changed', function(snapshot) {
-            snapshot.forEach(function(children) {
-              var tempK = children.key;
-              reference.child(key).child("request").once('value', function(val) {
-                if (val.val() === "null") {
-                  reference.child(key).child("startingLocation").once('value', function(val) {
-                    if (val.val() === startingLocation) {
-                      reference.child(key).child("endingLocation").once('value', function(val) {
-                        if (val.val() === endingLocation) {
+          reference.child(key).child("request").on("value", function(request) {
+            reference.child(key).child("startingLocation").on("value", function(tempstartingLocation) {
+              reference.child(key).child("endingLocation").on("value", function(tempendingLocation) {
+                if (request.val() === "null" && startingLocation === tempstartingLocation.val() && endingLocation === tempendingLocation.val()) {
 
-                          if (!entered) {
-                            reference.child(fname + " " + lname).child("request").set(key);
-                            reference.child(key).child("request").set(fname + " " + lname);
-                            entered = true;
-                          }
+                  reference.child(fname + " " + lname).child("request").set(key);
+                  reference.child(key).child("request").set(fname + " " + lname);
 
-                          var student2;
-                          var num1;
-                          var num2;
+                  reference.child(fname + " " + lname).child("pnumber").once('value', function(num1) {
+                    reference.child(key).child("pnumber").once('value', function(num2) {
 
-                          reference.child(fname + " " + lname).child("pnumber").once('value', function(val) {
-                            console.log(snapshot.val());
-                            num1 = val.val();
-                          });
+                      sendMessage(num1, "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
+                      sendMessage(num2, "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
+                      return;
 
-                          reference.child(key).child("pnumber").once('value', function(val) {
-                            console.log(snapshot.val());
-                            num2 = val.val();
-                          });
-
-                          if (count < 1) {
-                            sendMessage(num1, "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
-                            sendMessage(num2, "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
-                            count ++;
-                            fname = "";
-                            lname = "";
-                            key = "";
-                            return;
-                          }
-                        }
-                      });
-                    }
+                    });
                   });
+
                 }
               });
             });
           });
         }
-      });
+      }
     });
   }
 
