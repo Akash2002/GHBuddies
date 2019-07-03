@@ -8,11 +8,6 @@ exports.sendRequest = functions.https.onCall((data, context) => {
   var result = "Success!";
   var tocontinue = true;
 
-  var count = 0;
-
-  var sentMessage = false;
-  var entered = false;
-
   var fname = data.fname;
   var lname = data.lname;
   var pnumber = data.pnumber;
@@ -55,15 +50,22 @@ exports.sendRequest = functions.https.onCall((data, context) => {
               reference.child(key).child("endingLocation").on("value", function(tempendingLocation) {
                 if (request.val() === "null" && startingLocation === tempstartingLocation.val() && endingLocation === tempendingLocation.val()) {
 
+                  console.log(key);
+                  console.log(request.val());
+                  console.log(tempstartingLocation.val());
+                  console.log(tempendingLocation.val());
+
                   reference.child(fname + " " + lname).child("request").set(key);
                   reference.child(key).child("request").set(fname + " " + lname);
 
-                  reference.child(fname + " " + lname).child("pnumber").once('value', function(num1) {
-                    reference.child(key).child("pnumber").once('value', function(num2) {
+                  reference.child(fname + " " + lname).child("pnumber").on("value", function(num1) {
+                    reference.child(key).child("pnumber").on("value", function(num2) {
 
-                      sendMessage(num1, "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
-                      sendMessage(num2, "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
-                      return;
+                      console.log(num1.val());
+                      console.log(num2.val());
+
+                      sendMessage(num1.val(), "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
+                      sendMessage(num2.val(), "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
 
                     });
                   });
