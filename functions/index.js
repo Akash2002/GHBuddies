@@ -47,11 +47,11 @@ exports.sendRequest = functions.https.onCall((data, context) => {
   }
 
   if (tocontinue) {
-    reference.once('value', function(snapshot) {
+    reference.on('child_added', function(snapshot) {
       snapshot.forEach(function(children) {
         var key = children.key;
         if (fname + " " + lname !== key) {
-          reference.child(key).once('value', function(snapshot) {
+          reference.child(key).on('child_changed', function(snapshot) {
             snapshot.forEach(function(children) {
               var tempK = children.key;
               reference.child(key).child("request").once('value', function(val) {
