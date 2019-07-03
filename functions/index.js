@@ -8,6 +8,8 @@ exports.sendRequest = functions.https.onCall((data, context) => {
   var result = "Success!";
   var tocontinue = true;
 
+  var entered = false;
+
   const fname = data.fname;
   const lname = data.lname;
   const pnumber = data.pnumber;
@@ -55,11 +57,13 @@ exports.sendRequest = functions.https.onCall((data, context) => {
                     if (val.val() === startingLocation) {
                       reference.child(key).child("endingLocation").on('value', function(val) {
                         if (val.val() === endingLocation) {
-                          reference.child(fname + " " + lname).child("request").set(key);
-                          reference.child(key).child("request").set(fname + " " + lname);
+                          if (!entered) {
+                            reference.child(fname + " " + lname).child("request").set(key);
+                            reference.child(key).child("request").set(fname + " " + lname);
+                            entered = true;
+                          }
 
                           var student2;
-
                           var num1;
                           var num2;
 
