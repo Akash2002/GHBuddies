@@ -13,11 +13,11 @@ exports.sendRequest = functions.https.onCall((data, context) => {
   var sentMessage = false;
   var entered = false;
 
-  const fname = data.fname;
-  const lname = data.lname;
-  const pnumber = data.pnumber;
-  const startingLocation = data.startingLocation;
-  const endingLocation = data.endingLocation;
+  var fname = data.fname;
+  var lname = data.lname;
+  var pnumber = data.pnumber;
+  var startingLocation = data.startingLocation;
+  var endingLocation = data.endingLocation;
 
   var reference = admin.database().ref();
 
