@@ -84,6 +84,9 @@ exports.sendRequest = functions.https.onCall((data, context) => {
                             sendMessage(num1, "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
                             sendMessage(num2, "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
                             count ++;
+                            fname = "";
+                            lname = "";
+                            key = "";
                             return;
                           }
                         }
