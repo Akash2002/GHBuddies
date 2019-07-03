@@ -9,6 +9,7 @@ exports.sendRequest = functions.https.onCall((data, context) => {
   var tocontinue = true;
 
   var entered = false;
+  var sentMessage = false;
 
   const fname = data.fname;
   const lname = data.lname;
@@ -57,6 +58,7 @@ exports.sendRequest = functions.https.onCall((data, context) => {
                     if (val.val() === startingLocation) {
                       reference.child(key).child("endingLocation").on('value', function(val) {
                         if (val.val() === endingLocation) {
+
                           if (!entered) {
                             reference.child(fname + " " + lname).child("request").set(key);
                             reference.child(key).child("request").set(fname + " " + lname);
@@ -76,10 +78,12 @@ exports.sendRequest = functions.https.onCall((data, context) => {
                             console.log(snapshot.val());
                             num2 = val.val();
                           });
-
-                          sendMessage(num1, "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
-                          sendMessage(num2, "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
-                          return;
+                          if (!sentMessage) {
+                            sendMessage(num1, "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
+                            sendMessage(num2, "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
+                            sentMessage = true;
+                            return;
+                          }
                         }
                       });
                     }
