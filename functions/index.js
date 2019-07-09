@@ -1,12 +1,13 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
-admin.initializeApp(functions.config().firebase);
+const accountSid = 'AC704a64a71d8f0ec21abfd00870d49be8';
+const authToken = '521346e9f3732692fc345653942f09e8';
+const client = require('twilio')(accountSid, authToken);
+
+admin.initializeApp();
 
 exports.sendRequest = functions.https.onCall((data, context) => {
-
-  var result = "Success!";
-  var tocontinue = true;
 
   var fname = data.fname;
   var lname = data.lname;
@@ -14,94 +15,138 @@ exports.sendRequest = functions.https.onCall((data, context) => {
   var startingLocation = data.startingLocation;
   var endingLocation = data.endingLocation;
 
-  var reference = admin.database().ref();
+  var db = admin.firestore();
 
-  if (fname.length > 0 && lname.length > 0) {
-    if (pnumber.length > 0) {
-      if (startingLocation.length > 0) {
-        if (endingLocation.length > 0) {
-          reference.child(fname + " " + lname).set({
-            pnumber: pnumber,
-            startingLocation: startingLocation,
-            endingLocation: endingLocation,
-            request: "null",
-            time: Date.now()
-          });
-        }
-      } else {
-        result = 'Invalid location.';
-        tocontinue = false;
-      }
-    } else {
-      result = 'Invalid phone number.';
-      tocontinue = false;
-    }
-  } else {
-    result = 'Invalid name.';
-    tocontinue = false;
+  if (fname.length <= 0 || lname.length <= 0) {
+    return {
+      text: "Please enter a valid name."
+    };
   }
 
-  if (tocontinue) {
-    reference.once('value', function(snapshot) {
-      for (var key in snapshot.val()) {
-        if (fname + " " + lname !== key) {
-          reference.child(key).child("request").on("value", function(request) {
-            reference.child(key).child("startingLocation").on("value", function(tempstartingLocation) {
-              reference.child(key).child("endingLocation").on("value", function(tempendingLocation) {
-                if (request.val() === "null" && startingLocation === tempstartingLocation.val() && endingLocation === tempendingLocation.val()) {
+  if (!(isValidNumber(pnumber))) {
+    return {
+      text: "Please enter a valid number."
+    };
+  }
 
-                  console.log(key);
-                  console.log(request.val());
-                  console.log(tempstartingLocation.val());
-                  console.log(tempendingLocation.val());
+  if (startingLocation === "Choose...") {
+    return {
+      text: "Please enter a valid location."
+    };
+  }
 
-                  reference.child(fname + " " + lname).child("request").set(key);
-                  reference.child(key).child("request").set(fname + " " + lname);
+  if (endingLocation === "Choose...") {
+    return {
+      text: "Please enter a valid location."
+    };
+  }
 
-                  reference.child(fname + " " + lname).child("pnumber").on("value", function(num1) {
-                    reference.child(key).child("pnumber").on("value", function(num2) {
+  if (startingLocation === endingLocation) {
+    return {
+      text: "Please enter different starting and ending locations."
+    };
+  }
 
-                      console.log(num1.val());
-                      console.log(num2.val());
-
-                      sendMessage(num1.val(), "You have been matched with " + key + "! Please meet them in the lobby in the next 5 minutes.");
-                      sendMessage(num2.val(), "You have been matched with " + fname + ' ' + lname + "! Please meet them in the lobby in the next 5 minutes.");
-
-                    });
-                  });
-
-                }
-              });
-            });
-          });
-        }
-      }
+  var selfRef = db.collection("Users").doc(fname + " " + lname).set({
+      fname: fname,
+      lname: lname,
+      pnumber: pnumber,
+      startingLocation: startingLocation,
+      endingLocation: endingLocation,
+      time: Date.now()
+    })
+    .then(docRef => {
+      console.log("LOGINFO : Added " + fname + ", " + lname + ", " + pnumber + ", " + startingLocation + ", " + endingLocation + ", " + Date.now());
+      return console.log("Document written with ID: ", docRef.id);
+    })
+    .catch(function(error) {
+      console.error("Error adding document: ", error);
     });
-  }
 
-  // returning result.
+  var usersRef = db.collection("Users");
+  var query = usersRef.where("startingLocation", "==", startingLocation).where("endingLocation", "==", endingLocation);
+
+  query.get().then(function(querySnapshot) {
+    return querySnapshot.forEach(function(doc) {
+      var targetFname = doc.data().fname;
+      var targetLname = doc.data().lname;
+      var targetPnumber = doc.data().pnumber;
+
+      console.log("LOGINFO : " + fname + " " + lname + " has been matched with " + targetFname + " " + targetLname + " to head to " + endingLocation + " from " + startingLocation);
+
+      client.messages
+        .create({
+          body: "You have been matched with " + targetFname + " " + targetLname + "! Please meet them in the " + startingLocation + " lobby in the next 5 minutes to head to " + endingLocation,
+          from: '+14702857147',
+          to: '+1' + pnumber
+        })
+        .then(message => console.log(message.sid))
+        .catch(err => console.log(err));
+      client.messages
+        .create({
+          body: "You have been matched with " + fname + " " + lname + "! Please meet them in the " + startingLocation + " lobby in the next 5 minutes to head to " + endingLocation,
+          from: '+14702857147',
+          to: '+1' + targetPnumber
+        })
+        .then(message => console.log(message.sid))
+        .catch(err => console.log(err));
+
+      // console.log(doc.id, ' => ', doc.data());
+
+      return Promise.all([
+        usersRef.doc(doc.id).delete(),
+        usersRef.doc(fname + " " + lname).delete()
+      ]);
+
+    });
+  }).catch(function(error) {
+    console.error("Error adding document: ", error);
+  });
+
   return {
-    text: result
+    text: "Success"
   };
+
 });
 
-// exports.scheduledCheck = functions.pubsub.schedule('every 1 minutes').onRun((context) => {
-//   var d = new Date();
-//   var n = d.getTime();
-//   sendMessage("lean and dab it's " + n);
-// });
+exports.scheduledCheck = functions.pubsub.schedule('every 1 minutes').onRun((context) => {
+  var time = Date.now();
 
-function sendMessage(number, text) {
-  const accountSid = 'AC704a64a71d8f0ec21abfd00870d49be8';
-  const authToken = '521346e9f3732692fc345653942f09e8';
-  const client = require('twilio')(accountSid, authToken);
+  var db = admin.firestore();
+  var usersRef = db.collection("Users");
 
-  client.messages
-    .create({
-      body: text,
-      from: '+14702857147',
-      to: '+1' + number
-    })
-    .then(message => console.log(message.sid))
-    .catch(err => console.log(err));
+  usersRef.get().then(function(querySnapshot) {
+    return querySnapshot.forEach(function(doc) {
+      var targetName = doc.data().fname + " " + doc.data().lname;
+      var targetTime = doc.data().time;
+      var targetPnumber = doc.data().pnumber;
+
+      if (time - targetTime >= (1000 * 60 * 10)) {
+
+        client.messages
+          .create({
+            body: "It has been 10 minutes since your request and no one has responded. Cancelling request. :(",
+            from: '+14702857147',
+            to: '+1' + targetPnumber
+          })
+          .then(message => console.log(message.sid))
+          .catch(err => console.log(err));
+
+        return usersRef.doc(targetName).delete();
+      }
+    });
+  }).catch(function(error) {
+    console.error("Error adding document: ", error);
+  });
+
+  return null;
+});
+
+function isValidNumber(phoneNumber) {
+  var newPhoneNumber = phoneNumber.replace(/\D/g, "");
+
+  if (newPhoneNumber.length === 10) {
+    return (true);
+  } else
+    return (false);
 }

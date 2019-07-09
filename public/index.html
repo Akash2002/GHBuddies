@@ -1,26 +1,34 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
 
+  <style>
+    * {
+      font-family: 'Open Sans', sans-serif;
+    }
+  </style>
+
   <title>GHBuddies</title>
-  <!-- Required meta tags -->
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
 
   <script src="https://www.gstatic.com/firebasejs/6.1.1/firebase.js"></script>
 
 </head>
 
-<body>
+<body style="background-color:#0B172A">
 
 
   <div class="jumbotron" style="background-color:#0B172A">
     <h1 class="display-4" style="text-align: center; color:white" ;>GHBuddies</h1>
-    <p class="lead" style="text-align: center ; color:white"">Left with no one to walk with after 7 PM at GHP? Simply send a request and get a buddy instantly!" </p> <hr class="my-4">
+    <p class="lead" style="text-align: center ; color:white"">No one to walk with after 7 PM?</p>
+    <p class="lead" style="text-align: center ; color:white"">Enter your information below to get a text message when you are matched with another student!</p> <hr class=" my-4">
 
       <div class="input-group mb-3">
         <div class="input-group-prepend">
@@ -34,21 +42,23 @@
         <div class="input-group-prepend">
           <span class="input-group-text" id="inputGroup-sizing-default" style="color:white;background-color:#BC4123">Phone Number</span>
         </div>
-        <input type="number" placeholder="XXX-XXX-XXXX" id="phoneInput" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        <input type="number" pattern="\d*" placeholder="XXXXXXXXXX" id="phoneInput" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
       </div>
 
       <div class="input-group mb-3">
         <div class="input-group-prepend">
-          <label class="input-group-text" for="inputGroupSelect01" style="color:white;background-color:#BC4123">Starting Destination</label>
+          <label class="input-group-text" for="startingInput" style="color:white;background-color:#BC4123">Starting Destination</label>
         </div>
-        <select class="custom-select" id="inputGroupSelect01">
+        <select class="custom-select" id="startingInput">
           <option selected>Choose...</option>
           <option value="Krannert">Krannert (Dining Hall)</option>
           <option value="Cage Center">Cage Center (Gym)</option>
           <option value="Dana">Dana (Boy's Dorm)</option>
           <option value="MoField">MoField (Girl's Dorm)</option>
-          <option value="McAllister Hall">McAllister Hall (Math, Science, Engineering, and More!)</option>
-          <option value="Evans Hall">Evans Hall (Social Studies, Acting, and More!)</option>
+          <option value="McAllister Hall">McAllister Hall (Math, Science, Engineering)</option>
+          <option value="Evans Hall">Evans Hall (Social Studies, Acting)</option>
+          <option value="Cook Building">Cook Building (Band)</option>
+          <option value="Moon Building">Moon Building (Art)</option>
           <option value="Chapel">Chapel</option>
           <option value="Ladd Center">Ladd Center (Medicine)</option>
         </select>
@@ -56,25 +66,31 @@
 
       <div class="input-group mb-3">
         <div class="input-group-prepend">
-          <label class="input-group-text" for="inputGroupSelect01" style="color:white;background-color:#BC4123">Ending Destination</label>
+          <label class="input-group-text" for="endingInput" style="color:white;background-color:#BC4123">Ending Destination</label>
         </div>
-        <select class="custom-select" id="inputGroupSelect02">
+        <select class="custom-select" id="endingInput">
           <option selected>Choose...</option>
-          <option value="Krannert">Krannert</option>
+          <option value="Krannert">Krannert (Dining Hall)</option>
           <option value="Cage Center">Cage Center (Gym)</option>
           <option value="Dana">Dana (Boy's Dorm)</option>
           <option value="MoField">MoField (Girl's Dorm)</option>
-          <option value="McAllister Hall">McAllister Hall (Math, Science, Engineering, and More!)</option>
-          <option value="Evans Hall">Evans Hall (Social Studies, Acting, and More!)</option>
+          <option value="McAllister Hall">McAllister Hall (Math, Science, Engineering)</option>
+          <option value="Evans Hall">Evans Hall (Social Studies, Acting)</option>
+          <option value="Cook Building">Cook Building (Band)</option>
+          <option value="Moon Building">Moon Building (Art)</option>
           <option value="Chapel">Chapel</option>
           <option value="Ladd Center">Ladd Center (Medicine)</option>
         </select>
       </div>
 
-      <button type="button" class="btn btn-dark" onclick="request()" style="color:white; text-align: center; color:white;background-color:#BC4123"">Request</button>
+      <button type="button" class="btn btn-dark" onclick="request()" style="color:white; text-align: center; color:white;background-color:#800000"">Request</button>
       <hr class=" my-4">
-        <p style="color:white" ;> We suggest you to call the person to know where exactly they are and what they look like."</p>
-        <a href="CampusMapMain.pdf" style="text-align: center">Click here for a campus map</a>
+        <p style="color:white" ;>After submitting, you will get a SMS text message within the next few minutes if you have been matched with someone.</p>
+        <a href="https://www.berry.edu/uploadedFiles/Website/_Assets/Documents/CampusMap.pdf" style="text-align: center">Click here for a campus map</a>
+        <p> </p>
+        <p style="color:white" ;>Run into any issues? Feel free to contact us at ghbuddies@gmail.com for any questions or feedback.</p>
+        <p> </p>
+        <p style="color:white" ;>© Copyright 2019. This website is a student project and not affiliated with GHP or Berry College.</p>
   </div>
 
   <script>
@@ -85,38 +101,64 @@
       databaseURL: 'https://ghbuddies-123.firebaseio.com'
     });
 
-    var startingDestinationInput = document.getElementById('inputGroupSelect01');
-    var endingDestinationInput = document.getElementById('inputGroupSelect02');
-    var fnameInput = document.getElementById("fnameInput");
-    var lnameInput = document.getElementById("lnameInput");
-    var phoneInput = document.getElementById("phoneInput");
-
-    var fname = "";
-    var lname = "";
-    var startingLocation = "";
-    var endingLocation = "";
-    //******************* VARIABLES **********************//
+    document.getElementById("fnameInput").value = localStorage.getItem('fname');;
+    document.getElementById("lnameInput").value = localStorage.getItem('lname');;
+    document.getElementById("phoneInput").value = localStorage.getItem('pnumber');;
 
     function request() {
-      fname = fnameInput.value;
-      lname = lnameInput.value;
-      var phone = phoneInput.value;
-      startingLocation = startingDestinationInput.options[startingDestinationInput.selectedIndex].text;
-      endingLocation = endingDestinationInput.options[endingDestinationInput.selectedIndex].text;
+      var fname = document.getElementById("fnameInput").value;
+      var lname = document.getElementById("lnameInput").value;
+      var pnumber = document.getElementById("phoneInput").value;
+      var startingLocation = document.getElementById('startingInput').options[document.getElementById('startingInput').selectedIndex].text;
+      var endingLocation = document.getElementById('endingInput').options[document.getElementById('endingInput').selectedIndex].text;
+
+      if (fname.length <= 0 || lname.length <= 0) {
+        alert("Please enter a valid name!");
+        return;
+      }
+
+      var newpnumber = pnumber.replace(/\D/g, "");
+
+      if (newpnumber.length != 10) {
+        alert("Please enter a valid phone number!")
+        return;
+      }
+
+      if (startingLocation.length < 0 || startingLocation == "Choose...") {
+        alert("Please select a valid starting location!");
+        return;
+      }
+
+      if (endingLocation.length < 0 || endingLocation == "Choose...") {
+        alert("Please select a valid ending location!");
+        return;
+      }
+
+      if (startingLocation == endingLocation) {
+        alert("Please select different starting and ending locations!");
+        return;
+      }
+
+      localStorage.setItem('fname', fname);
+      localStorage.setItem('lname', lname);
+      localStorage.setItem('pnumber', pnumber);
+
+      setTimeout("alert('Submitted! You will recieve an SMS text message if you are matched in the next 10 minutes.');", 1);
+      document.getElementById("fnameInput").value = '';
+      document.getElementById("lnameInput").value = '';
+      document.getElementById("phoneInput").value = '';
 
       var sendRequest = firebase.functions().httpsCallable('sendRequest');
       sendRequest({
         fname: fname,
         lname: lname,
-        pnumber: phone,
+        pnumber: newpnumber,
         startingLocation: startingLocation,
         endingLocation,
         endingLocation
       }).then(function(result) {
-        // Read result of the Cloud Function.
         var resultMessage = result.data.text;
         console.log(resultMessage);
-        alert(resultMessage);
       });
     }
   </script>
