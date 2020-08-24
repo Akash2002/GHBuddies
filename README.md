@@ -12,3 +12,4 @@ time. So, we thought of making this application for all GHPers during the Summer
 ### Solution
 --------------
 We decided to use a Firebase backend using Cloud Firestore for storing data and Firebase functions to run our notification SMS service (Twilio) in the background.
+Visit GHBuddies [here](https://ghbuddies.com)! App currently in development for if and when GHP resumes after Covid19!
